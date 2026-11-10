@@ -29,9 +29,13 @@ Autor: **Jim Craft**
 
 ## Instalace
 
-1. Složku `BetterBartender` zkopíruj do `Interface\AddOns\` ve složce hry.
-2. Spusť hru znovu (nový addon načte jen nové spuštění, `/reload` nestačí).
-3. Při prvním vstupu do hry addon převezme lišty a klávesy, které máš teď na obrazovce.
+1. Stáhni `BetterBartender-1.0.0.zip` z
+   [posledního vydání](https://github.com/MichaelGrznar/BetterBartender/releases/latest).
+2. Rozbal ho do `Interface\AddOns\` ve složce hry. Vznikne složka `BetterBartender`.
+   (ZIP z tlačítka **Code** obsahuje složku `BetterBartender-main`: tu musíš přejmenovat
+   na `BetterBartender`, jinak ji hra nenačte.)
+3. Spusť hru znovu (nový addon načte jen nové spuštění, `/reload` nestačí).
+4. Při prvním vstupu do hry addon převezme lišty a klávesy, které máš teď na obrazovce.
 
 ## Ovládání
 
