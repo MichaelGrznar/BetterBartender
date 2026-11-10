@@ -42,10 +42,6 @@ Autor: **Jim Craft**
 | Příkaz | Co dělá |
 | --- | --- |
 | `/bbt` | otevře nebo zavře režim úprav |
-| `/bbt klavesy` | přiřazování kláves: najeď na políčko a stiskni klávesu, pravý klik klávesy smaže, Esc konec |
-| `/bbt kopie Jméno` | rozložení a klávesy z jiné postavy (stačí začátek jména) |
-| `/bbt reset` | vrátí panely a klávesy na stav z prvního spuštění |
-| `/bbt minimapa` | skryje nebo ukáže tlačítko u minimapy |
 
 Tlačítko u minimapy: levý klik režim úprav, pravý klik přiřazování kláves, tažením ho
 posuneš.
