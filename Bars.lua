@@ -177,6 +177,8 @@ function M:LayoutBar(bar)
 		UnregisterStateDriver(f, "visibility")
 		f:Hide()
 	end
+	-- bar 1 pages (Buttons.lua): its arrows stand left of it
+	if bar.id == 1 then self:PlacePageArrows(f) end
 	self:UpdateOverlay(bar, f)
 end
 

@@ -21,6 +21,10 @@ Autor: **Jim Craft**
   Shiftem, Ctrl nebo Alt. Skrytý panel na své klávesy reaguje dál.
 - **Vzhled jako rozhraní serveru** (BOCoreUI), i s popisky kouzel a cooldowny maker,
   kterými se na serveru sesílají kouzla.
+- **Stránky panelu 1:** Shift + šipka nahoru / dolů nebo malé šipky vlevo od panelu
+  přepínají jeho 12 políček mezi 9 stránkami, jako hlavní lišta v původní hře. Na každou
+  stránku si poskládáš jinou sadu akcí. Stránky 3 až 6 jsou políčka ostatních panelů
+  (stránka 3 je pravý panel), stejně jako v původní hře. Stránka zůstane i po odhlášení.
 - **Přepínání hlavní lišty** podle postoje a ve vozidle jako ve hře.
 - **Každá postava má své rozložení.** Rozložení a klávesy jdou zkopírovat z jiné postavy.
 - **Bez rizika:** akce v políčkách drží server a addon je nemění. Klávesy si ukládá zvlášť,
@@ -29,7 +33,7 @@ Autor: **Jim Craft**
 
 ## Instalace
 
-1. Stáhni `BetterBartender-1.0.0.zip` z
+1. Stáhni `BetterBartender-1.1.0.zip` z
    [posledního vydání](https://github.com/MichaelGrznar/BetterBartender/releases/latest).
 2. Rozbal ho do `Interface\AddOns\` ve složce hry. Vznikne složka `BetterBartender`.
    (ZIP z tlačítka **Code** obsahuje složku `BetterBartender-main`: tu musíš přejmenovat
@@ -42,6 +46,7 @@ Autor: **Jim Craft**
 | Příkaz | Co dělá |
 | --- | --- |
 | `/bbt` | otevře nebo zavře režim úprav |
+| Shift + šipka nahoru / dolů | další / předchozí stránka panelu 1 (i v boji) |
 
 Tlačítko u minimapy: levý klik režim úprav, pravý klik přiřazování kláves, tažením ho
 posuneš.

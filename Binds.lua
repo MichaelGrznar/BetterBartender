@@ -38,6 +38,12 @@ function M:ApplyBindings()
 		return
 	end
 	ClearOverrideBindings(owner)
+	-- Bar 1's pages (Buttons.lua), as in the original game; a slot given the same key keeps it
+	-- (bound after these).
+	if self.pageUp then
+		SetOverrideBindingClick(owner, false, "SHIFT-UP", self.pageUp:GetName(), "LeftButton")
+		SetOverrideBindingClick(owner, false, "SHIFT-DOWN", self.pageDown:GetName(), "LeftButton")
+	end
 	local bound = {}
 	for slot, keys in pairs(self.profile.keys) do
 		if self.active[slot] then

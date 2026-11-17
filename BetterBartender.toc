@@ -2,7 +2,7 @@
 ## Title: BetterBartender
 ## Notes: Vlastní akční lišty: kolik políček a sloupců chceš, přesouvání myší a klávesa na každé políčko. Pro Bradavice Online (3.3.5a).
 ## Author: Jim Craft
-## Version: 1.0.0
+## Version: 1.1.0
 ## X-Category: Action Bars
 ## OptionalDeps: BOCore, BOCoreDB, BOCoreUI
 ## SavedVariables: BetterBartenderDB

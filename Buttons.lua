@@ -131,8 +131,7 @@ end)
 
 -- In the game the main bar switches its slots by stance and while controlling another
 -- unit (BOCoreUI/DFUI/modules/vehicle.lua, conditions copied from there). This applies to
--- slots 1 to 12, whichever bar they are on. Paging with arrows (bar:2 to bar:6) is gone:
--- pages 2 to 6 are bars of their own now.
+-- slots 1 to 12, whichever bar they are on.
 local PAGE_BY_CLASS = {
 	DRUID = "[bonusbar:1,nostealth] 7; [bonusbar:1,stealth] 7; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10; ",
 	WARRIOR = "[bonusbar:1] 7; [bonusbar:2] 8; [bonusbar:3] 9; ",
@@ -140,8 +139,15 @@ local PAGE_BY_CLASS = {
 	ROGUE = "[bonusbar:1] 7; [form:3] 7; ",
 }
 
+-- Bar 1 pages like the game's main bar (17. 11. 2026): Shift+Up and Shift+Down, or the arrows
+-- left of the bar, go through pages 1 to PAGES, round and round. Page n shows slots
+-- (n - 1) * 12 + 1 to n * 12, as in the original game, so a page another bar has (page 3 is
+-- the right bar's slots) shows the same actions there. A vehicle's bar always wins, a stance's
+-- bar on page 1 only, as in the game. The page is kept for the next login.
+M.PAGES = 9
+
 function M:CreatePager()
-	local pager = CreateFrame("Frame", "BetterBartenderPager", UIParent, "SecureHandlerStateTemplate")
+	local pager = CreateFrame("Frame", "BetterBartenderPager", UIParent, "SecureHandlerAttributeTemplate")
 	for slot = 1, 12 do
 		pager:SetFrameRef("slot" .. slot, self:Button(slot))
 	end
@@ -151,13 +157,100 @@ function M:CreatePager()
 			table.insert(buttons, self:GetFrameRef("slot" .. slot))
 		end
 	]])
-	pager:SetAttribute("_onstate-page", [[
-		for slot, button in ipairs(buttons) do
-			button:SetAttribute("actionpage", tonumber(newstate) or 1)
+	-- state-page from the state driver below (11 a vehicle, 7 to 10 a stance, 0 none),
+	-- userpage from the arrows and keys
+	pager:SetAttribute("_onattributechanged", [[
+		if name ~= "state-page" and name ~= "userpage" then return end
+		local state = tonumber(self:GetAttribute("state-page")) or 0
+		local page = tonumber(self:GetAttribute("userpage")) or 1
+		if state == 11 or (state > 0 and page == 1) then page = state end
+		for _, button in ipairs(buttons) do
+			button:SetAttribute("actionpage", page)
 		end
 	]])
+	local saved = tonumber(self.profile.page) or 1
+	if saved < 1 or saved > M.PAGES then saved = 1 end
+	pager:SetAttribute("userpage", saved)
 	local class = select(2, UnitClass("player"))
-	RegisterStateDriver(pager, "page", "[bonusbar:5] 11; " .. (PAGE_BY_CLASS[class] or "") .. "1")
+	RegisterStateDriver(pager, "page", "[bonusbar:5] 11; " .. (PAGE_BY_CLASS[class] or "") .. "0")
+	-- (runs after the secure handler, outside it: only remembers the page and writes it out)
+	pager:HookScript("OnAttributeChanged", function(_, name, value)
+		if name == "userpage" then
+			M.profile.page = tonumber(value)
+			M:UpdatePageText()
+		end
+	end)
+	self.pager = pager
+	self:CreatePageArrows()
+end
+
+---------------------------------------------------------------------------
+-- The arrows left of bar 1
+---------------------------------------------------------------------------
+
+local ARROW = [[Interface\MainMenuBar\UI-MainMenu-Scroll]]
+
+local function PageTooltip(self)
+	GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+	GameTooltip:AddLine(string.format("Panel 1: stránka %d z %d", tonumber(M.pager:GetAttribute("userpage")) or 1, M.PAGES))
+	GameTooltip:AddLine(self.bbtTip, 1, 1, 1)
+	GameTooltip:AddLine("Každá stránka má svých 12 políček. Stránky 3 až 6 jsou políčka ostatních panelů, jako v původní hře.", 0.8, 0.8, 0.8, true)
+	GameTooltip:Show()
+end
+
+local function PageArrow(name, holder, step, kind, tip)
+	local b = CreateFrame("Button", name, holder, "SecureHandlerClickTemplate")
+	b:SetWidth(24)
+	b:SetHeight(24)
+	b:SetNormalTexture(ARROW .. kind .. "Button-Up")
+	b:SetPushedTexture(ARROW .. kind .. "Button-Down")
+	b:SetHighlightTexture(ARROW .. kind .. "Button-Highlight", "ADD")
+	b:RegisterForClicks("AnyUp")
+	b:SetFrameRef("pager", M.pager)
+	b:SetAttribute("step", step)
+	b:SetAttribute("_onclick", string.format([[
+		local pager = self:GetFrameRef("pager")
+		local page = (tonumber(pager:GetAttribute("userpage")) or 1) + self:GetAttribute("step")
+		if page > %d then page = 1 elseif page < 1 then page = %d end
+		pager:SetAttribute("userpage", page)
+	]], M.PAGES, M.PAGES))
+	b.bbtTip = tip
+	b:SetScript("OnEnter", PageTooltip)
+	b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	return b
+end
+
+function M:CreatePageArrows()
+	local holder = CreateFrame("Frame", "BetterBartenderPageArrows", self.hidden)
+	holder:SetWidth(36)
+	holder:SetHeight(M.BUTTON_SIZE)
+	self.pageUp = PageArrow("BetterBartenderPageUp", holder, 1, "Up", "Další stránka (Shift + šipka nahoru)")
+	self.pageUp:SetPoint("TOPRIGHT", holder, "TOPRIGHT", 2, 5)
+	self.pageDown = PageArrow("BetterBartenderPageDown", holder, -1, "Down", "Předchozí stránka (Shift + šipka dolů)")
+	self.pageDown:SetPoint("BOTTOMRIGHT", holder, "BOTTOMRIGHT", 2, -5)
+	local text = holder:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	text:SetPoint("RIGHT", holder, "RIGHT", -20, 0)
+	holder.text = text
+	self.pageArrows = holder
+	self:UpdatePageText()
+end
+
+function M:UpdatePageText()
+	local holder = self.pageArrows
+	if not holder then return end
+	local page = tonumber(self.pager:GetAttribute("userpage")) or 1
+	holder.text:SetText(page)
+	if page == 1 then holder.text:SetTextColor(1, 1, 1) else holder.text:SetTextColor(1, 0.82, 0) end
+end
+
+-- The arrows stand left of bar 1 and go with it (its scale, hidden with it). Out of combat.
+function M:PlacePageArrows(f)
+	local holder = self.pageArrows
+	if not holder then return end
+	holder:SetParent(f)
+	holder:ClearAllPoints()
+	holder:SetPoint("RIGHT", f, "LEFT", -2, 0)
+	holder:Show()
 end
 
 ---------------------------------------------------------------------------
